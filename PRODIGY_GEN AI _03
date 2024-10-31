@@ -1,0 +1,56 @@
+text = "This is an example of text generation using Markov chains. Markov chains are powerful for generating new text."
+import random
+
+def build_markov_chain(text, n=1):
+    markov_chain = {}
+    
+    # Iterate through the text to build the model
+    for i in range(len(text) - n):
+        # Get the current state (n characters)
+        current_state = text[i:i+n]
+        next_char = text[i+n]
+        
+        if current_state not in markov_chain:
+            markov_chain[current_state] = {}
+        
+        if next_char not in markov_chain[current_state]:
+            markov_chain[current_state][next_char] = 0
+        
+        markov_chain[current_state][next_char] += 1
+    
+    # Convert counts to probabilities
+    for current_state, next_chars in markov_chain.items():
+        total_count = sum(next_chars.values())
+        for char in next_chars:
+            next_chars[char] /= total_count
+            
+    return markov_chain
+def generate_text(markov_chain, start_state, length=100):
+    current_state = start_state
+    output = current_state
+    
+    for _ in range(length):
+        next_chars = markov_chain.get(current_state, {})
+        
+        if not next_chars:
+            break
+        
+        # Choose the next character based on probabilities
+        next_char = random.choices(
+            list(next_chars.keys()), 
+            weights=list(next_chars.values())
+        )[0]
+        
+        output += next_char
+        # Move to the next state
+        current_state = output[-len(current_state):]
+    
+    return output
+# Example usage
+text = "This is an example of text generation using Markov chains. Markov chains are powerful for generating new text."
+markov_chain = build_markov_chain(text, n=1)
+start_state = random.choice(list(markov_chain.keys()))
+generated_text = generate_text(markov_chain, start_state, length=50)
+
+print("Generated Text:")
+print(generated_text)
